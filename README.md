@@ -136,6 +136,21 @@ java -cp "target/classes:target/lib/*" server.ChatServer
 java -cp "target/classes:target/lib/*" client.ChatClientApp
 ```
 
+### 4.4 局域网联机指南 (LAN Support)
+本系统支持局域网内多台电脑互连。
+
+1.  **准备工作**:
+    *   确保两台电脑（主机 A 和主机 B）连入同一个 WiFi 或局域网。
+    *   关闭电脑防火墙，或允许 Java 程序通过防火墙。
+2.  **启动服务器**:
+    *   在主机 A 上运行服务器 (`server.ChatServer`)。
+    *   获取主机 A 的局域网 IP 地址 (Windows 运行 `ipconfig`, Mac/Linux 运行 `ifconfig`)，例如 `192.168.1.100`。
+3.  **启动客户端**:
+    *   **主机 A (本地)**: 启动客户端，服务器地址填 `127.0.0.1` 或 `192.168.1.100`。
+    *   **主机 B (远程)**: 启动客户端，服务器地址填主机 A 的 IP (`192.168.1.100`)。
+4.  **开始聊天**:
+    *   登录成功后，两台电脑即可实现私聊、群聊和文件互传。
+
 ---
 
 ## 5. 测试效果与结论
