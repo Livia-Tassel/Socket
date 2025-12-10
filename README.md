@@ -89,6 +89,21 @@
 *   **Create**: `Client` -> `Server` (`CREATE_GROUP`) -> `Members` (`GROUP_CREATED`)
     *   创建者指定群名和成员列表，服务器分配唯一 GroupID 并通知所有成员。
 
+### 2.4 文件系统与数据持久化 (File System & Persistence)
+系统在客户端实现了基于本地文件系统的数据持久化功能：
+
+*   **数据目录**: 运行时自动在根目录创建 `ChatData/` 文件夹。
+*   **目录结构**:
+    ```text
+    ChatData/
+      └── {username}/              // 每个用户的独立数据空间
+            ├── history/           // 聊天记录
+            │     ├── {target}.json    // 与某个好友或群组的聊天日志 (JSON格式)
+            └── cache/             // 媒体缓存
+                  ├── {timestamp}_{filename}  // 自动缓存接收到的图片和文件
+    ```
+*   **实现原理**: 当用户登录时，`HistoryManager` 会根据用户名初始化对应的目录。发送或接收消息时，消息对象被序列化为 JSON 追加写入对应的日志文件。图片的 Base64 数据也会被单独解码并保存为文件到 `cache` 目录，既实现了离线查看，也方便了资源管理。
+
 ---
 
 ## 3. 环境准备 (Prerequisites)

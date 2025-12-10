@@ -33,13 +33,25 @@ public class ChatPanel extends JPanel {
     
     // 简单的内存消息历史存储: targetId -> List<Message>
     private Map<String, List<Message>> chatHistory;
+    
+    // 历史消息管理器
+    private client.util.HistoryManager historyManager;
 
     public ChatPanel(ChatClient client) {
         this.client = client;
-        this.chatHistory = new HashMap<>();
+        this.chatHistory = new HashMap<>(); // 内存缓存
         setLayout(new BorderLayout());
         
         initComponents();
+        
+        // 注意：HistoryManager 必须在登录成功获得用户名后初始化
+        // 见 initHistoryManager 方法
+    }
+    
+    public void initHistoryManager(String username) {
+        if (username != null && !username.isEmpty()) {
+            this.historyManager = new client.util.HistoryManager(username);
+        }
     }
     
     private void initComponents() {
@@ -117,8 +129,16 @@ public class ChatPanel extends JPanel {
         messagePane.setText("");
         if (currentTarget == null) return;
         
-        List<Message> history = chatHistory.getOrDefault(currentTarget, new ArrayList<>());
-        for (Message msg : history) {
+        // 1. 从内存加载
+        List<Message> memoryHistory = chatHistory.computeIfAbsent(currentTarget, k -> new ArrayList<>());
+        
+        // 2. 如果内存为空，尝试从文件加载 (首次切换到该用户)
+        if (memoryHistory.isEmpty() && historyManager != null) {
+            List<Message> loaded = historyManager.loadHistory(currentTarget);
+            memoryHistory.addAll(loaded);
+        }
+        
+        for (Message msg : memoryHistory) {
             appendMessageToPane(msg);
         }
     }
@@ -144,7 +164,13 @@ public class ChatPanel extends JPanel {
         }
         
         if (key != null) {
+            // 1. 存入内存
             chatHistory.computeIfAbsent(key, k -> new ArrayList<>()).add(msg);
+            
+            // 2. 存入本地文件
+            if (historyManager != null) {
+                historyManager.saveMessage(key, msg);
+            }
             
             // 如果当前正在看这个会话，则显示
             if (key.equals(currentTarget)) {

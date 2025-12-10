@@ -46,6 +46,9 @@ public class MainFrame extends JFrame implements MessageListener {
             System.exit(0);
         }
         
+        // 登录成功后，初始化历史记录管理器
+        chatPanel.initHistoryManager(client.getUsername());
+        
         setTitle("多人聊天系统 - " + client.getUsername());
     }
 
